@@ -31,6 +31,7 @@ jobs:
           - matrixportal-s3
           - matrixportal-s3-waveshare
           - waveshare-s3
+          - matrixportal-s3-128
 
     env:
       IDF_CCACHE_ENABLE: "1"
