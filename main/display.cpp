@@ -108,6 +108,20 @@
 #define CLK 2
 #define LAT 47
 #define OE 14
+#elif CONFIG_BOARD_MATRIXPORTAL_S3_12
+// Two 64x32 panels chained — same pins as MATRIXPORTAL_S3
+#define R1 42
+#define R2 38
+#define CH_A 45
+#define CH_B 36
+#define CH_C 48
+#define CH_D 35
+#define CH_E 21
+#define CLK 2
+#define LAT 47
+#define OE 14
+#define WIDTH 128
+#define HEIGHT 32
 #else  // GEN1 from here down.
 #define CH_A 26
 #define CH_B 5
@@ -139,8 +153,8 @@ int display_initialize(void) {
   // Initialize pin values based on hardware and swap_colors setting
   int8_t pin_R1, pin_G1, pin_BL1, pin_R2, pin_G2, pin_BL2;
 
-#if CONFIG_BOARD_MATRIXPORTAL_S3
-  pin_R1 = R1;  // R1 = 42
+#if CONFIG_BOARD_MATRIXPORTAL_S3 || CONFIG_BOARD_MATRIXPORTAL_S3_128
+    pin_R1 = R1;  // R1 = 42
   pin_R2 = R2;  // R2 = 38
   if (swap_colors) {
     // Swapped configuration for MATRIXPORTALS3
@@ -198,17 +212,31 @@ int display_initialize(void) {
   bool invert_clock_phase = true;
 #endif
 
-  HUB75_I2S_CFG mxconfig(WIDTH,                   // width
-                         HEIGHT,                  // height
-                         1,                       // chain length
-                         pins,                    // pin mapping
-                         HUB75_I2S_CFG::FM6126A,  // driver chip
-                         HUB75_I2S_CFG::TYPE138,  // line driver
-                         true,                    // double-buffering
-                         HUB75_I2S_CFG::HZ_10M,   // clock speed
-                         1,                       // latch blanking
-                         invert_clock_phase       // invert clock phase
-  );
+  #if CONFIG_BOARD_MATRIXPORTAL_S3_128
+    HUB75_I2S_CFG mxconfig(WIDTH / 2,               // module width = 64 (one panel)
+                           HEIGHT,                  // height
+                           2,                       // chain length (2 panels = 128px)
+                           pins,
+                           HUB75_I2S_CFG::FM6126A,
+                           HUB75_I2S_CFG::TYPE138,
+                           true,
+                           HUB75_I2S_CFG::HZ_10M,
+                           1,
+                           invert_clock_phase
+    );
+  #else
+    HUB75_I2S_CFG mxconfig(WIDTH,                   // width
+                           HEIGHT,                  // height
+                           1,                       // chain length
+                           pins,
+                           HUB75_I2S_CFG::FM6126A,
+                           HUB75_I2S_CFG::TYPE138,
+                           true,
+                           HUB75_I2S_CFG::HZ_10M,
+                           1,
+                           invert_clock_phase
+    );
+  #endif
 
   _matrix = new MatrixPanel_I2S_DMA(mxconfig);
 
@@ -259,30 +287,32 @@ void display_shutdown(void) {
 
 void display_draw(const uint8_t *pix, int width, int height, int channels,
                   int ixR, int ixG, int ixB) {
-  int scale = 1;
-#if CONFIG_BOARD_TRONBYT_S3_WIDE
-  if (width == 64 && height == 32) {
-    scale = 2;  // Scale up to 128x64
-  }
-#endif
+    int scale_x = 1, scale_y = 1;
+  #if CONFIG_BOARD_TRONBYT_S3_WIDE
+    if (width == 64 && height == 32) {
+      scale_x = 2;
+      scale_y = 2;  // Scale up to 128x64
+    }
+  #elif CONFIG_BOARD_MATRIXPORTAL_S3_128
+    if (width == 64 && height == 32) {
+      scale_x = 2;  // Stretch horizontally across both chained panels
+    }
+  #endif
 
-  for (unsigned int i = 0; i < height; i++) {
-    for (unsigned int j = 0; j < width; j++) {
-      const uint8_t *p = &pix[(i * width + j) * channels];
-      uint8_t r = p[ixR];
-      uint8_t g = p[ixG];
-      uint8_t b = p[ixB];
+    for (unsigned int i = 0; i < height; i++) {
+      for (unsigned int j = 0; j < width; j++) {
+        const uint8_t *p = &pix[(i * width + j) * channels];
+        uint8_t r = p[ixR];
+        uint8_t g = p[ixG];
+        uint8_t b = p[ixB];
 
-      // Draw each pixel scaled up (2x2 pixels for each original pixel)
-      for (int sy = 0; sy < scale; sy++) {
-        for (int sx = 0; sx < scale; sx++) {
-          _matrix->drawPixelRGB888(j * scale + sx, i * scale + sy, r, g, b);
+        for (int sy = 0; sy < scale_y; sy++) {
+          for (int sx = 0; sx < scale_x; sx++) {
+            _matrix->drawPixelRGB888(j * scale_x + sx, i * scale_y + sy, r, g, b);
+          }
         }
       }
     }
-  }
-  _matrix->flipDMABuffer();
-}
 
 void display_clear(void) { _matrix->clearScreen(); }
 
