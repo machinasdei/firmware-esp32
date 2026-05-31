@@ -1,6 +1,6 @@
 PROJECT_NAME := firmware
 
-.PHONY: all clean fullclean flash monitor menuconfig help tidbyt-gen1 tidbyt-gen1_swap tidbyt-gen2 tronbyt-s3 tronbyt-s3-wide pixoticker matrixportal-s3 matrixportal-s3-waveshare waveshare-s3
+.PHONY: all clean fullclean flash monitor menuconfig help tidbyt-gen1 tidbyt-gen1_swap tidbyt-gen2 tronbyt-s3 tronbyt-s3-wide pixoticker matrixportal-s3 matrixportal-s3-waveshare waveshare-s3 matrixportal-s3-128
 
 help:
 	@echo "Tronbyt Firmware Build System"
@@ -23,6 +23,7 @@ help:
 	@echo "  matrixportal-s3          Build for MatrixPortal S3"
 	@echo "  matrixportal-s3-waveshare Build for MatrixPortal S3 (Waveshare)"
 	@echo "  waveshare-s3             Build for Waveshare ESP32-S3-RGB-Matrix"
+    @echo "  matrixportal-s3-128      Build for matrixportal-s3-128"
 
 IDFPY := $(shell which idf.py)
 PYTHON := python3
@@ -82,3 +83,6 @@ matrixportal-s3-waveshare:
 
 waveshare-s3:
 	$(call build_device,esp32s3,sdkconfig.defaults.waveshare-s3)
+
+matrixportal-s3-128:
+    $(call build_device,esp32s3,sdkconfig.defaults.matrixportal-s3-128)
