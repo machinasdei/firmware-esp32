@@ -108,7 +108,7 @@
 #define CLK 2
 #define LAT 47
 #define OE 14
-#elif CONFIG_BOARD_MATRIXPORTAL_S3_12
+#elif CONFIG_BOARD_MATRIXPORTAL_S3_128
 // Two 64x32 panels chained — same pins as MATRIXPORTAL_S3
 #define R1 42
 #define R2 38
@@ -313,6 +313,8 @@ void display_draw(const uint8_t *pix, int width, int height, int channels,
         }
       }
     }
+    _matrix->flipDMABuffer();
+}
 
 void display_clear(void) { _matrix->clearScreen(); }
 
