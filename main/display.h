@@ -5,7 +5,7 @@
 
 #define DISPLAY_MAX_BRIGHTNESS 100
 #define DISPLAY_MIN_BRIGHTNESS 0
-#define DISPLAY_DEFAULT_BRIGHTNESS 10
+#define DISPLAY_DEFAULT_BRIGHTNESS 40
 extern volatile int32_t isAnimating; // Declare the variable
 #ifdef __cplusplus
 extern "C" {
