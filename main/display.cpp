@@ -143,7 +143,7 @@
 #endif
 
 static MatrixPanel_I2S_DMA *_matrix;
-static uint8_t _brightness = DISPLAY_DEFAULT_BRIGHTNESS;
+static uint8_t _brightness = 255; // sentinel: forces setBrightness8() on first init call
 static const char *TAG = "display";
 
 int display_initialize(void) {
