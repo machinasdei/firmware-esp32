@@ -877,7 +877,7 @@ void app_main(void) {
         }
       } else {
         // Successful remote_get
-        display_set_brightness(brightness_pct);
+        display_set_brightness(DISPLAY_DEFAULT_BRIGHTNESS); // ignore server scale mismatch (0-5 vs 0-100)
         ESP_LOGI(TAG, "Queuing new webp (%d bytes)", len);
 
         int queued_counter = gfx_update(webp, len, app_dwell_secs);
