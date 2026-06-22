@@ -343,9 +343,8 @@ esp_err_t ap_stop(void) {
 }
 
 static void ap_shutdown_timer_callback(TimerHandle_t xTimer) {
-  ESP_LOGI(TAG, "Shutting down config portal");
-  ap_stop();
-  esp_wifi_set_mode(WIFI_MODE_STA);
+  ESP_LOGI(TAG, "No config received — rebooting to retry WiFi");
+  esp_restart();
 }
 
 static esp_err_t root_handler(httpd_req_t *req) {
