@@ -108,8 +108,8 @@
 #define CLK 2
 #define LAT 47
 #define OE 14
-#elif CONFIG_BOARD_MATRIXPORTAL_S3_128
-// Two 64x32 panels chained — same pins as MATRIXPORTAL_S3
+#elif CONFIG_BOARD_MATRIXPORTAL_S3_128 || CONFIG_BOARD_MATRIXPORTAL_S3_192
+// Two (128) or three (192) 64x32 panels chained — same pins as MATRIXPORTAL_S3
 #define R1 42
 #define R2 38
 #define CH_A 45
@@ -120,7 +120,11 @@
 #define CLK 2
 #define LAT 47
 #define OE 14
+#if CONFIG_BOARD_MATRIXPORTAL_S3_192
+#define WIDTH 192
+#else
 #define WIDTH 128
+#endif
 #define HEIGHT 32
 #else  // GEN1 from here down.
 #define CH_A 26
@@ -153,7 +157,8 @@ int display_initialize(void) {
   // Initialize pin values based on hardware and swap_colors setting
   int8_t pin_R1, pin_G1, pin_BL1, pin_R2, pin_G2, pin_BL2;
 
-#if CONFIG_BOARD_MATRIXPORTAL_S3 || CONFIG_BOARD_MATRIXPORTAL_S3_128
+#if CONFIG_BOARD_MATRIXPORTAL_S3 || CONFIG_BOARD_MATRIXPORTAL_S3_128 || \
+    CONFIG_BOARD_MATRIXPORTAL_S3_192
     pin_R1 = R1;  // R1 = 42
   pin_R2 = R2;  // R2 = 38
   if (swap_colors) {
@@ -212,10 +217,10 @@ int display_initialize(void) {
   bool invert_clock_phase = true;
 #endif
 
-  #if CONFIG_BOARD_MATRIXPORTAL_S3_128
-    HUB75_I2S_CFG mxconfig(WIDTH / 2,               // module width = 64 (one panel)
+  #if CONFIG_BOARD_MATRIXPORTAL_S3_128 || CONFIG_BOARD_MATRIXPORTAL_S3_192
+    HUB75_I2S_CFG mxconfig(64,                      // module width = 64 (one panel)
                            HEIGHT,                  // height
-                           2,                       // chain length (2 panels = 128px)
+                           WIDTH / 64,              // chain length (2 or 3 panels)
                            pins,
                            HUB75_I2S_CFG::FM6126A,
                            HUB75_I2S_CFG::TYPE138,
@@ -293,9 +298,9 @@ void display_draw(const uint8_t *pix, int width, int height, int channels,
       scale_x = 2;
       scale_y = 2;  // Scale up to 128x64
     }
-  #elif CONFIG_BOARD_MATRIXPORTAL_S3_128
+  #elif CONFIG_BOARD_MATRIXPORTAL_S3_128 || CONFIG_BOARD_MATRIXPORTAL_S3_192
     if (width == 64 && height == 32) {
-      scale_x = 2;  // Stretch horizontally across both chained panels
+      scale_x = WIDTH / 64;  // Stretch horizontally across all chained panels
     }
   #endif
 
